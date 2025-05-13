@@ -14,7 +14,13 @@ class AddNoteViewController: UIViewController {
     
     var numberOfExistingCell:Int?
     
-    lazy var Label:UILabel = {
+    var sectionOfExistingCell:Int?
+    
+    var priorityOfExistingCell:Priority? = .medium
+    
+    var noteToEdit: Note?
+    
+    lazy private var Label:UILabel = {
         var label = UILabel()
         label.textColor = .black
         label.text = "Add Note"
@@ -23,7 +29,7 @@ class AddNoteViewController: UIViewController {
         return label
     }()
     
-    lazy var titleTextLabel:UILabel = {
+    lazy private  var titleTextLabel:UILabel = {
         var label = UILabel()
         label.textColor = .black
         label.text = "Title:"
@@ -32,7 +38,7 @@ class AddNoteViewController: UIViewController {
         return label
     }()
     
-    lazy var titleTextField:UITextField = {
+    lazy  var titleTextField:UITextField = {
         var titleTextField = UITextField()
         titleTextField.attributedPlaceholder = NSAttributedString(string: "Title", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white])
         titleTextField.textColor = .black
@@ -56,7 +62,7 @@ class AddNoteViewController: UIViewController {
         return textView
     }()
     
-    lazy var noteTextLabel: UILabel = {
+    lazy private var noteTextLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
         label.text = "Note:"
@@ -65,6 +71,24 @@ class AddNoteViewController: UIViewController {
         return label
     }()
     
+    lazy private var PriorityLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .black
+        label.text = "Choose priority:"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 25, weight: .bold)
+        return label
+    }()
+    
+    lazy private var Slider: UISlider = {
+        var slider = UISlider()
+        slider.minimumValue = 0
+        slider.maximumValue = 2
+        slider.value = 1
+        slider.isEnabled = true
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        return slider
+    }()
    
     
     override func viewDidLoad() {
@@ -91,7 +115,7 @@ class AddNoteViewController: UIViewController {
         view.addSubview(Label)
 //        view.addSubview(titleTextField)
 //        view.addSubview(textView)
-        let stackView = UIStackView(arrangedSubviews: [titleTextLabel, titleTextField, noteTextLabel, textView])
+        let stackView = UIStackView(arrangedSubviews: [titleTextLabel, titleTextField, Slider , noteTextLabel, textView])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 20
@@ -109,11 +133,38 @@ class AddNoteViewController: UIViewController {
 
             ])
     }
+    
+    func configure(with note: Note) {
+        self.textView.text = note.text
+        self.titleTextField.text = note.title
+        self.priorityOfExistingCell = note.priority
+    }
+    
+    func checkPriority() -> Int {
+        let priorityValue = Int(round(Slider.value))
+        switch priorityValue {
+        case 0:
+            priorityOfExistingCell! = .low
+            return 2
+        case 1:
+            priorityOfExistingCell! = .medium
+            return 1
+        case 2:
+            priorityOfExistingCell! = .high
+            return 0
+        default:
+            priorityOfExistingCell! = .low
+            return 2
+        }
+    }
  
     @objc func handleSaveNote(sender: UIBarButtonItem) {
         
-        delegate?.dataSource.notes.append(Note(title: titleTextField.text ?? "" , text: textView.text ?? ""))
-        delegate?.dataSource.storage.saveData((delegate!.dataSource.notes))
+        let sectionNumber = checkPriority()
+        //takes delegate, accseses to hisdatasource and adds and configurates note to specifed section by its priority
+        delegate?.dataSource.save(note: Note(priority: priorityOfExistingCell!, title: titleTextField.text ?? "", text: textView.text ?? ""), sectionNumber: sectionNumber)
+//        delegate?.dataSource.notes.append(Note(title: titleTextField.text ?? "" , text: textView.text ?? "")
+//        delegate?.dataSource.storage.saveData((delegate!.dataSource.notes))
             print("Add Note")
         delegate?.notesTableView.reloadData()
         navigationController?.popToRootViewController(animated: true)
@@ -121,8 +172,12 @@ class AddNoteViewController: UIViewController {
     
     @objc func handleEditNote(sender: UIBarButtonItem) {
         
-        delegate?.dataSource.notes[numberOfExistingCell!] = Note(title: titleTextField.text ?? "", text: textView.text ?? "")
-        delegate?.dataSource.storage.saveData((delegate!.dataSource.notes))
+        let sectionNumber = checkPriority()
+        if sectionOfExistingCell! != sectionNumber {
+            delegate?.dataSource.notes[sectionOfExistingCell!].remove(at: numberOfExistingCell!)
+        }
+        delegate?.dataSource.notes[sectionOfExistingCell!][numberOfExistingCell!] = Note(priority: priorityOfExistingCell!, title: titleTextField.text ?? "", text: textView.text ?? "")
+//        delegate?.dataSource.storage.saveData((delegate!.dataSource.notes))
             print("Edit Note")
         delegate?.notesTableView.reloadData()
         navigationController?.popToRootViewController(animated: true)
