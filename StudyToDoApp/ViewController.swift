@@ -10,6 +10,7 @@ import UIKit
 class ViewController: UIViewController,UITableViewDelegate {
     
     let  dataSource = NotesTableViewDataSource()
+    
     let notesTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.register(NoteCell.self, forCellReuseIdentifier: "NoteCell")
@@ -21,20 +22,19 @@ class ViewController: UIViewController,UITableViewDelegate {
     override func viewDidLoad() {
     
         super.viewDidLoad()
-        
         notesTableView.dataSource = dataSource
         notesTableView.delegate = self
-        
+        dataSource.loadData()
         setupTopBarButtonItem()
         setupLayout()
     }
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let swipeAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, completionHandler) in
-     
-            self.dataSource.notes.remove(at: [indexPath.section][indexPath.row])
-//          self.dataSource.storage.saveData((self.dataSource.notes))
+            self.dataSource.notes[indexPath.section].remove(at: indexPath.row)
+            print("newData:",self.dataSource.notes)
             self.notesTableView.deleteRows(at: [indexPath], with: .automatic)
+            self.dataSource.saveData()
         }
         return UISwipeActionsConfiguration(actions: [swipeAction])
     }

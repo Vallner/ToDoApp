@@ -9,33 +9,54 @@ import UIKit
 class NotesTableViewDataSource: NSObject, UITableViewDataSource {
    
     let storage = DataManager()
-    var notes:[[Note]] = []
-    var notesData: [[Note]]{
-        get {
-          var notesArray: [[Note]] = []
-          let notesData =  DataManager().obtainData()
-            for priority in notesData.keys {
-                notesArray.append(Array(notesData[priority] ?? []))
-            }
-            return notesArray
+    var priorites: [String] = ["High priority", "Medium priority", "Low priority"]
+    var notes: [[Note]] = []
+    
+//    func save(note: Note, sectionNumber: Int) {
+//        notes = notesData
+//        notes[sectionNumber].append(note)
+//        notesData = notes
+//    }
+    func loadData() {
+        var loadedNotes:[[Note]] = []
+        for priority in priorites {
+            loadedNotes.append(storage.obtainData()[priority] ?? [])
         }
-        set {
-            var notesData: [Priority: [Note]] = [:]
-            for section in newValue {
-                for note in section {
-                    notesData[note.priority]?.append(note)
-                }
-            }
-            storage.saveData(notesData)
+        print(loadedNotes)
+        notes = loadedNotes
+    }
+    
+    func saveData() {
+        var newData: [String: [Note]] = [:]
+        var priority:String = ""
+        var iteration:Int = 0
+        for row in notes {
+            priority = priorites[iteration]
+            iteration += 1
+            print(priority)
+            print(row)
+            newData[priority] = row
         }
+        storage.saveData(newData)
+        }
+//        notes = priorites.map { priority in
+//            storage.obtainData()[priority]!
+//            
+//        }
+    func numberOfSections(in tableView: UITableView) -> Int {
+        print(notes.count)
+        return notes.count 
     }
-    func save(note: Note, sectionNumber: Int) {
-        notes = notesData
-        notes[sectionNumber].append(note)
-        notesData = notes
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        44
     }
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        priorites[section]
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return notesData[section].count
+        print("notes in ",section ,notes[section].count)
+        return notes[section].count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -49,9 +70,7 @@ class NotesTableViewDataSource: NSObject, UITableViewDataSource {
         cell.configure(with: notes[indexPath.section][indexPath.row])
         return cell
     }
-    func tableViewNumberOfSections(in tableView: UITableView) -> Int {
-        return notes.count
-    }
+   
 //    func configureCell(_ cell: inout UITableViewCell, forRowAt indexPath: IndexPath) {
 //        var newCellConfiguration = cell.defaultContentConfiguration()
 //        newCellConfiguration.text = notes[indexPath.row].title

@@ -7,19 +7,10 @@
 
 import Foundation
 
-enum Status:Codable {
-    case active
-    case completed
-}
-enum Priority:Codable {
-    case low
-    case medium
-    case high
-}
 struct Note:Codable{
    
 //    var status: Status
-    var priority: Priority
+    var priority: String
     var title: String
     var text: String
 
@@ -30,9 +21,9 @@ class DataManager {
     let encoder = JSONEncoder()
     private let storage = UserDefaults.standard
     
-    func obtainData() -> [Priority:[Note]] {
+    func obtainData() -> [String:[Note]] {
         do{
-            let notes =  try self.decoder.decode([Priority:[Note]].self, from: storage.data(forKey: "notes") ?? Data())
+            let notes =  try self.decoder.decode([String:[Note]].self, from: storage.data(forKey: "notes") ?? Data())
             return notes
         }
          catch {
@@ -41,17 +32,13 @@ class DataManager {
         return [:]
     }
     
-    func saveData(_ notes: [Priority:[Note]]) {
+    func saveData(_ notes: [String:[Note]]) {
         do{
             let data = try self.encoder.encode(notes)
-            deleteAllData()
             storage.set(data, forKey: "notes")
         }
         catch {
             print("Error")
         }
-    }
-    func deleteAllData() {
-        storage.removeObject(forKey: "notes")
     }
 }
