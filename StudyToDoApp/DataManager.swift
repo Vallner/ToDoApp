@@ -13,6 +13,7 @@ struct Note:Codable{
     var priority: String
     var title: String
     var text: String
+    var addedDate: Date
 
 }
 

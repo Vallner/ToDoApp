@@ -47,8 +47,9 @@ class NotesTableViewDataSource: NSObject, UITableViewDataSource {
         print(notes.count)
         return notes.count 
     }
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        44
+        return 44
     }
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         priorites[section]

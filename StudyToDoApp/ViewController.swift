@@ -51,6 +51,16 @@ class ViewController: UIViewController,UITableViewDelegate {
         navigationController?.pushViewController(addViewController, animated: true)
     }
     
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let header = view as? UITableViewHeaderFooterView else { return }
+        var configuration = UIListContentConfiguration.header()
+        configuration.textProperties.font = .systemFont(ofSize: 20, weight: .medium)
+        configuration.text = dataSource.priorites[section]
+        configuration.textProperties.color = .darkGray
+        header.contentConfiguration = configuration
+        
+    }
+    
     func setupLayout() {
             
         view.addSubview(notesTableView)
